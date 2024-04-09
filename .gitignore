@@ -1,4 +1,5 @@
 .idea/
+.bsp/
 .settings/
 target/
 .DS_Store
