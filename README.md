@@ -1,4 +1,5 @@
 # Spot: Spark-OpenTelemetry
+[![Build](https://github.com/godatadriven/spot/actions/workflows/ci.yml/badge.svg)](https://github.com/godatadriven/spot/actions/workflows/ci.yml)
 
 This package connects [Apache Spark™][sp-home] to [OpenTelemetry][ot-home].
 

@@ -1,0 +1,27 @@
+---
+name: Dependency Submission
+
+on:
+  push:
+    branches:
+      - 'main'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Submit Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: coursier/cache-action@v6
+      - uses: coursier/setup-action@v1
+        with:
+          jvm: temurin:21
+          apps: sbt
+      - uses: scalacenter/sbt-dependency-submission@v2
+        with:
+          configs-ignore: >
+            scala-tool
+            runtime
