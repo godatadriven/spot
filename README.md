@@ -3,7 +3,7 @@
 
 This package connects [Apache Spark™][sp-home] to [OpenTelemetry][ot-home].
 
-This creates a layer of indirection to allow reporting metrics from any Spark or PySpark job to [OpenTelemetry Collector][ot-col], or directly to any [supported backend][ot-export].
+This allows reporting tracing and metrics from any Spark or PySpark job to [OpenTelemetry Collector][ot-col], or directly to any [supported backend][ot-export].
 
 ## Status
 
@@ -66,6 +66,10 @@ If the OpenTelemetry Autoconfigure mechanism doesn't meet your requirements, you
     ```
 
 ## Design Choices
+
+### Why not simply use Spark's built-in DropWizard support?
+
+Because that's something that already exists, and this is something I wanted to build. If the DropWizard metrics in Spark meet your needs, you should consider using those.
 
 ### Crash on initialization failure
 
