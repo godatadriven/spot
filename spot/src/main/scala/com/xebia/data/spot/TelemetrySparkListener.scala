@@ -3,7 +3,7 @@ package com.xebia.data.spot
 import io.opentelemetry.api.trace.{Span, StatusCode}
 import io.opentelemetry.context.Context
 import org.apache.spark.SparkConf
-import org.apache.spark.scheduler.{JobFailed, JobSucceeded, SparkListener, SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerJobEnd, SparkListenerJobStart, SparkListenerStageCompleted}
+import org.apache.spark.scheduler.{JobSucceeded, SparkListener, SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerJobEnd, SparkListenerJobStart, SparkListenerStageCompleted}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
@@ -24,7 +24,8 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
   @transient
   protected lazy val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  override val conf = OpenTelemetryConfig.from(sparkConf)
+  override def spotConfig: Map[String, String] = sparkConf.getAll.toMap
+
   private var applicationSpan: Option[(Span, Context)] = None
   private val jobSpans = mutable.Map[Int, (Span, Context)]()
 

@@ -16,7 +16,9 @@ lazy val spot = project
         name := "spot",
         libraryDependencies ++= Seq(
             `opentelemetry-api`,
-            `spark-core` % Provided
+            `spark-core` % Provided,
+            scalaTest % Test,
+            scalactic % Test
         ),
     )
 
@@ -27,7 +29,11 @@ lazy val `spot-complete` = project
         name := "spot-complete",
         libraryDependencies ++= Seq(
             `opentelemetry-sdk`,
-            `opentelemetry-sdk-autoconfigure`
+            `opentelemetry-sdk-autoconfigure`,
+            `opentelemetry-exporter-otlp`,
+            `spark-core` % Provided,
+            scalaTest % Test,
+            scalactic % Test
         ),
         assembly / assemblyJarName := s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar",
         assembly / assemblyOption ~= {
