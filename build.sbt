@@ -38,6 +38,14 @@ lazy val `spot-complete` = project
         assembly / assemblyJarName := s"${name.value}_${scalaBinaryVersion.value}-${version.value}.jar",
         assembly / assemblyOption ~= {
             _.withIncludeScala(false)
+        },
+        assembly / assemblyMergeStrategy := {
+            // TODO this okio business may well be wrong. Revisit this once we have an integration test to run.
+            case "META-INF/versions/9/module-info.class" => MergeStrategy.last
+            case "META-INF/okio.kotlin_module" => MergeStrategy.last
+            case x =>
+                val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
+                oldStrategy(x)
         }
     )
 
