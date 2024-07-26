@@ -1,8 +1,8 @@
 ThisBuild / organization := "com.xebia.data"
 ThisBuild / scmInfo := Some(ScmInfo(
-        url("https://github.com/xebia/spot"),
-        "https://github.com/xebia/spot.git",
-        "git@github.com:xebia/spot.git"))
+        url("https://github.com/godatadriven/spot"),
+        "https://github.com/godatadriven/spot.git",
+        "git@github.com:godatadriven/spot.git"))
 
 ThisBuild / scalaVersion := "2.13.14"
 ThisBuild / crossScalaVersions := Seq("2.12.19", "2.13.14")
