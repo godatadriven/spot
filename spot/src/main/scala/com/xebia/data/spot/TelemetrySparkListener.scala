@@ -34,7 +34,7 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
       .setAttribute(TelemetrySpanAttributes.appName, event.appName)
       .setAttribute(TelemetrySpanAttributes.sparkUser, event.sparkUser)
     event.appId.foreach(sb.setAttribute(TelemetrySpanAttributes.appId, _))
-    event.appId.foreach(sb.setAttribute(TelemetrySpanAttributes.appAttemptId, _))
+    event.appAttemptId.foreach(sb.setAttribute(TelemetrySpanAttributes.appAttemptId, _))
     val span = sb.startSpan()
     val context = span.storeInContext(Context.root())
     applicationSpan = Some((span, context))

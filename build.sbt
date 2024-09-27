@@ -22,7 +22,9 @@ lazy val spot = project
             `opentelemetry-api`,
             `spark-core` % Provided,
             scalaTest % Test,
-            scalactic % Test
+            scalactic % Test,
+            `opentelemetry-sdk-testing` % Test,
+            `assertj-core` % Test,
         ),
     )
 
