@@ -20,5 +20,5 @@ trait OpenTelemetrySupport {
     provider.get(spotConfig)
   }
 
-  lazy val tracer: Tracer = ???
+  lazy val tracer: Tracer = openTelemetry.getTracer("spot", version())
 }
