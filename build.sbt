@@ -4,8 +4,12 @@ ThisBuild / scmInfo := Some(ScmInfo(
         "https://github.com/godatadriven/spot.git",
         "git@github.com:godatadriven/spot.git"))
 
-ThisBuild / scalaVersion := "2.13.14"
-ThisBuild / crossScalaVersions := Seq("2.12.19", "2.13.14")
+ThisBuild / scalaVersion := "2.13.15"
+ThisBuild / crossScalaVersions := Seq("2.12.20", "2.13.15")
+ThisBuild / scalacOptions := Seq(
+    "--deprecation",
+    "--release:11",
+)
 
 import Dependencies._
 
@@ -50,6 +54,7 @@ lazy val `spot-complete` = project
     )
 
 lazy val root = project
+    .withId("spark-opentelemetry")
     .in(file("."))
     .aggregate(spot, `spot-complete`)
     .disablePlugins(AssemblyPlugin)
