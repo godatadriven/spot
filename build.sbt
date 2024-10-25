@@ -1,4 +1,5 @@
 ThisBuild / organization := "com.xebia.data"
+ThisBuild / homepage := Some(url("https://github.com/godatadriven/spot"))
 ThisBuild / scmInfo := Some(ScmInfo(
         url("https://github.com/godatadriven/spot"),
         "https://github.com/godatadriven/spot.git",
