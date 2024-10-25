@@ -13,12 +13,12 @@ This allows reporting tracing and metrics from any Spark or PySpark job to [Open
 
 The recommended way to use Spot relies on [OpenTelemetry Autoconfigure][ot-auto] to obtain the OpenTelemetry configuration. You pass the `spot-complete-*.jar` to spark-submit to make Spot available to your job, and configure `spark.extraListeners` to enable it.
 
-```bash
-SCALA_VERSION=2.12  # This will be 2.12 or 2.13, whichever matches your Spark deployment.
-spark-submit \
-    --jar com.xebia.data.spot.spot-complete_${SCALA_VERSION}-x.y.z.jar \
-    --conf spark.extraListeners=com.xebia.data.spot.TelemetrySparkListener \
-    com.example.MySparkJob
+```diff
+  SCALA_VERSION=2.12  # This will be 2.12 or 2.13, whichever matches your Spark deployment.
+  spark-submit \
++     --jar com.xebia.data.spot.spot-complete_${SCALA_VERSION}-x.y.z.jar \
++     --conf spark.extraListeners=com.xebia.data.spot.TelemetrySparkListener \
+      com.example.MySparkJob
 ```
 
 ### Context Propagation
