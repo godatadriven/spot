@@ -86,6 +86,10 @@ If the OpenTelemetry Autoconfigure mechanism doesn't meet your requirements, you
 
 Because that's something that already exists, and this is something I wanted to build. If the DropWizard metrics in Spark meet your needs, you should consider using those.
 
+### Why not simply use Spark's JobHistory server?
+
+In part for the same reason: because that's something that already exists, and this is something I wanted to build. There's obviously more of a difference here; the purpose of telemetry (whether that's DropWizard or OpenTelemetry) is to enable monitoring and alerting, whereas the JobHistory server is used reactively.
+
 ### Crash on initialization failure
 
 If the OpenTelemetry SDK cannot be obtained during startup, we allow the listener –and enclosing spark job– to crash.
@@ -94,6 +98,12 @@ If the OpenTelemetry SDK cannot be obtained during startup, we allow the listene
 
 **Rationale:** if you instrument the job, you expect to see your telemetry. Fail-fast behaviour ensures no telemetry is silently lost.
 
+## Future Work
+
+These are things that are out of scope for the moment:
+
+1. Downstream propagation of trace context. It may be useful in some environments to forward the trace context to downstream systems such as data stores.
+2. OpenTelemetry Airflow Plugin. If the Spark job is started by an Airflow DAG Run, it would be neat if some data from the DAG Run can be added to the OpenTelemetry context in Spot. Airflow could itself participate in distributed tracing: DAG Runs and Task Executions can be mapped as traces, with context propagation into the Spot Listener. In addition, key variables such as the data interval start and end could be made available as baggage.
 
 
 [ot-auto]:     https://opentelemetry.io/docs/languages/java/instrumentation/#automatic-configuration
