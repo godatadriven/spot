@@ -18,7 +18,7 @@ import scala.collection.mutable
  *       com.example.MySparkJob
  * }}}
  *
- * @param conf the `SparkConf`. This is provided automatically by the Spark application as it bootstraps.
+ * @param sparkConf the `SparkConf`. This is provided automatically by the Spark application as it bootstraps.
  */
 class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener with OpenTelemetrySupport {
   @transient
@@ -29,14 +29,19 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
   private var applicationSpan: Option[(Span, Context)] = None
   private val jobSpans = mutable.Map[Int, (Span, Context)]()
 
+  lazy val rootContext: Context = {
+    openTelemetry.getPropagators.getTextMapPropagator.extract(Context.root(), spotConfig, new GetContextFromConfig())
+  }
+
   override def onApplicationStart(event: SparkListenerApplicationStart): Unit = {
     val sb = tracer.spanBuilder(s"application-${event.appName}")
+      .setParent(rootContext)
       .setAttribute(TelemetrySpanAttributes.appName, event.appName)
       .setAttribute(TelemetrySpanAttributes.sparkUser, event.sparkUser)
     event.appId.foreach(sb.setAttribute(TelemetrySpanAttributes.appId, _))
     event.appAttemptId.foreach(sb.setAttribute(TelemetrySpanAttributes.appAttemptId, _))
     val span = sb.startSpan()
-    val context = span.storeInContext(Context.root())
+    val context = span.storeInContext(rootContext)
     applicationSpan = Some((span, context))
   }
 

@@ -21,6 +21,21 @@ spark-submit \
     com.example.MySparkJob
 ```
 
+### Context Propagation
+
+To use context propagation, provide the necessary headers as SparkConf values. The default configuration uses [`traceparent`][traceparent]:
+
+```diff
+  SCALA_VERSION=2.12  # This will be 2.12 or 2.13, whichever matches your Spark deployment.
+  spark-submit \
+      --jar com.xebia.data.spot.spot-complete_${SCALA_VERSION}-x.y.z.jar \
+      --conf spark.extraListeners=com.xebia.data.spot.TelemetrySparkListener \
++     --conf com.xebia.data.spot.traceparent=00-1234abcd5678abcd-1234abcd-01 \
+      com.example.MySparkJob
+```
+
+All SparkConf values that start with `com.xebia.data.spot.` are made available to the `ContextPropagator`. If you use a different propagator than the default, you can prefix its required keys accordingly.
+
 ### Prerequisites
 
 Instrumenting for telemetry is useless until you publish the recorded data somewhere. This might be the native metrics suite of your chosen cloud provider, or a free or commercial third party system such as Prometheus + Tempo + Grafana. You can have your instrumented Spark jobs publish directly to the backend, or run the traffic via OpenTelemetry Collector. Choosing the backend and routing architecture is outside the scope of this document.
@@ -89,3 +104,4 @@ If the OpenTelemetry SDK cannot be obtained during startup, we allow the listene
 [ot-home]:     https://opentelemetry.io/
 [ot-k8s-oper]: https://opentelemetry.io/docs/kubernetes/operator/
 [sp-home]:     https://spark.apache.org
+[traceparent]: https://www.w3.org/TR/trace-context/

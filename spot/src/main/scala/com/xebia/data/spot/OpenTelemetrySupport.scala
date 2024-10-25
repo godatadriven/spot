@@ -14,7 +14,7 @@ trait OpenTelemetrySupport {
   def spotConfig: Map[String, String]
 
   val openTelemetry: OpenTelemetry = {
-    val provFQCN = spotConfig.getOrElse("com.xebia.data.spot.sdkProvider", "com.xebia.data.spot.autoconf.SdkProvider")
+    val provFQCN = spotConfig.getOrElse(configPrefixed("sdkProvider"), DEFAULT_PROVIDER_FQCN)
     val provClass = java.lang.Class.forName(provFQCN)
     val provider = provClass.getDeclaredConstructor().newInstance().asInstanceOf[OpenTelemetrySdkProvider]
     provider.get(spotConfig)
