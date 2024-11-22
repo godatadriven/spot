@@ -36,3 +36,10 @@ jobs:
         shell: bash
         run: |
           sbt +package +assembly
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jar binaries
+          path: |
+            spot/target/spark-3.?-jvm-2.1?/spot-*.jar
+            spot-complete/target/spark-3.?-jvm-2.1?/spot-complete-*.jar
+          retention-days: 7
