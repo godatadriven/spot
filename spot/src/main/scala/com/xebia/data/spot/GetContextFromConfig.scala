@@ -1,9 +1,9 @@
 package com.xebia.data.spot
 
 import io.opentelemetry.context.propagation.TextMapGetter
-import scala.jdk.CollectionConverters._
 
 import java.lang
+import scala.collection.JavaConverters._
 
 /**
  * Bridges between Spark config and OpenTelemetry's context propagator system.

@@ -1,7 +1,7 @@
 package com.xebia.data.spot
 
 import org.scalatest.flatspec.AnyFlatSpecLike
-import scala.jdk.CollectionConverters._
+import scala.collection.JavaConverters._
 
 
 class GetContextFromConfigTest extends AnyFlatSpecLike {

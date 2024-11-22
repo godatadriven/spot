@@ -11,12 +11,26 @@ This allows reporting tracing and metrics from any Spark or PySpark job to [Open
 
 ## Usage
 
-The recommended way to use Spot relies on [OpenTelemetry Autoconfigure][ot-auto] to obtain the OpenTelemetry configuration. You pass the `spot-complete-*.jar` to spark-submit to make Spot available to your job, and configure `spark.extraListeners` to enable it.
+The recommended way to use Spot relies on [OpenTelemetry Autoconfigure][ot-auto] to obtain the OpenTelemetry configuration. You pass the spot-complete jar to spark-submit to make Spot available to your job, and configure `spark.extraListeners` to enable it.
+
+The jar filename embeds the two-digit Spark version, and the scala version:
+
+```text
+spot-complete-3.3_2.12-1.0.0.jar
+              ↑↑↑ ↑↑↑↑ ↑↑↑↑↑
+               A   B    C
+A: Spark Version ∈ { 3.3, 3.4, 3.5 }
+B: Scala Version ∈ { 2.12, 2.13 }
+C: Spot library version
+```
+
+The spark and scala versions must match your spark process.
 
 ```diff
-  SCALA_VERSION=2.12  # This will be 2.12 or 2.13, whichever matches your Spark deployment.
+  SPARK_VERSION=3.5
+  SCALA_VERSION=2.12
   spark-submit \
-+     --jar com.xebia.data.spot.spot-complete_${SCALA_VERSION}-x.y.z.jar \
++     --jar com.xebia.data.spot.spot-complete-${SPARK_VERSION}_${SCALA_VERSION}-x.y.z.jar \
 +     --conf spark.extraListeners=com.xebia.data.spot.TelemetrySparkListener \
       com.example.MySparkJob
 ```
@@ -26,9 +40,10 @@ The recommended way to use Spot relies on [OpenTelemetry Autoconfigure][ot-auto]
 To use context propagation, provide the necessary headers as SparkConf values. The default configuration uses [`traceparent`][traceparent]:
 
 ```diff
-  SCALA_VERSION=2.12  # This will be 2.12 or 2.13, whichever matches your Spark deployment.
+  SPARK_VERSION=3.5
+  SCALA_VERSION=2.12
   spark-submit \
-      --jar com.xebia.data.spot.spot-complete_${SCALA_VERSION}-x.y.z.jar \
+      --jar com.xebia.data.spot.spot-complete-${SPARK_VERSION}_${SCALA_VERSION}-x.y.z.jar \
       --conf spark.extraListeners=com.xebia.data.spot.TelemetrySparkListener \
 +     --conf com.xebia.data.spot.traceparent=00-1234abcd5678abcd-1234abcd-01 \
       com.example.MySparkJob
@@ -72,9 +87,10 @@ If the OpenTelemetry Autoconfigure mechanism doesn't meet your requirements, you
 2. Make the compiled class available to your Spark environment.
 3. Add `com.xebia.data.spot.sdkProvider` to your spark config, referencing your implementation.
     ```diff
+      SPARK_VERSION=3.5
       SCALA_VERSION=2.12  # This will be 2.12 or 2.13, whichever matches your Spark deployment.
       spark-submit \
-          --jar com.xebia.data.spot.spot-complete_${SCALA_VERSION}-x.y.z.jar \
+          --jar com.xebia.data.spot.spot-complete-${SPARK_VERSION}_${SCALA_VERSION}-x.y.z.jar \
           --conf spark.extraListeners=com.xebia.data.spot.TelemetrySparkListener \
     +     --conf com.xebia.data.spot.sdkProvider=com.example.MyCustomProvider \
           com.example.MySparkJob
