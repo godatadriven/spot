@@ -89,9 +89,12 @@ class TestTelemetrySparkListener(extraConf: (String, String)*) {
 object TestingSdkProvider {
   private[spot] val clock: TestClock = TestClock.create()
   private[spot] val spanExporter: InMemorySpanExporter = InMemorySpanExporter.create()
-  private[spot] val testingSdk: OpenTelemetrySdk = OpenTelemetrySdk.builder().setTracerProvider(
-    SdkTracerProvider.builder().setClock(clock).setSampler(Sampler.alwaysOn()).addSpanProcessor(SimpleSpanProcessor.builder(spanExporter).build()).build()
-  ).setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance())).build()
+  private[spot] val testingSdk: OpenTelemetrySdk = {
+    sys.props.put("io.opentelemetry.context.enableStrictContext", "true")
+    OpenTelemetrySdk.builder().setTracerProvider(
+      SdkTracerProvider.builder().setClock(clock).setSampler(Sampler.alwaysOn()).addSpanProcessor(SimpleSpanProcessor.builder(spanExporter).build()).build()
+    ).setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance())).build()
+  }
 
   def getFinishedSpanItems: util.List[SpanData] = {
     spanExporter.flush()
