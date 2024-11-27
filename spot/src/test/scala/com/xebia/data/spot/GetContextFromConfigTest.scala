@@ -9,12 +9,12 @@ class GetContextFromConfigTest extends AnyFlatSpecLike {
 
   behavior of "GetContextFromConfigTest"
 
-  it should "only return keys in the com.xebia.data.spot namespace, with prefix removed" in new ContextFromConfigTest {
+  it should "only return keys in the spark.com.xebia.data.spot namespace, with prefix removed" in new ContextFromConfigTest {
     val keys = getContextFromConfig.keys(spotConfig).asScala
     keys should contain only("abc", "xyz")
   }
 
-  it should "get values by applying the com.xebia.data.spot prefix" in new ContextFromConfigTest {
+  it should "get values by applying the spark.com.xebia.data.spot prefix" in new ContextFromConfigTest {
     getContextFromConfig.get(spotConfig, "abc") should equal ("abc")
     getContextFromConfig.get(spotConfig, "xyz") should equal ("xyz")
   }
@@ -27,7 +27,7 @@ private[this] trait ContextFromConfigTest {
     "spark.executor.cores" -> "8",
     "abc" -> "def",
     "xyz" -> "123",
-    "com.xebia.data.spot.abc" -> "abc",
-    "com.xebia.data.spot.xyz" -> "xyz"
+    "spark.com.xebia.data.spot.abc" -> "abc",
+    "spark.com.xebia.data.spot.xyz" -> "xyz"
   )
 }

@@ -62,7 +62,7 @@ class TelemetrySparkListenerTest extends AnyFlatSpecLike with BeforeAndAfterEach
       .hasStatus(StatusData.ok())
   }
 
-  it should "get traceId from config if provided" in new TestTelemetrySparkListener("com.xebia.data.spot.traceparent" -> "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01") {
+  it should "get traceId from config if provided" in new TestTelemetrySparkListener("spark.com.xebia.data.spot.traceparent" -> "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01") {
     tsl.onApplicationStart(SparkListenerApplicationStart("testapp", Some("ta123"), 100L, "User", Some("1"), None, None))
     tsl.onApplicationEnd(SparkListenerApplicationEnd(5200L))
     val appSpan = getFinishedSpanItems.get(0)
@@ -76,7 +76,7 @@ class TelemetrySparkListenerTest extends AnyFlatSpecLike with BeforeAndAfterEach
 class TestTelemetrySparkListener(extraConf: (String, String)*) {
   lazy val tsl: TelemetrySparkListener = {
     val conf: SparkConf = new SparkConf()
-    conf.set("com.xebia.data.spot.sdkProvider", classOf[TestingSdkProvider].getName)
+    conf.set("spark.com.xebia.data.spot.sdkProvider", classOf[TestingSdkProvider].getName)
     conf.setAll(extraConf)
     new TelemetrySparkListener(conf)
   }

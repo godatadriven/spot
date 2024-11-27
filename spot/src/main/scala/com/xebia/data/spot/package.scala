@@ -9,7 +9,7 @@ package object spot {
   val DEFAULT_PROVIDER_FQCN = "com.xebia.data.spot.autoconf.SdkProvider"
 
   /** Common prefix for all our keys in the SparkConf. */
-  val SPOT_CONFIG_PREFIX = "com.xebia.data.spot."
+  val SPOT_CONFIG_PREFIX = "spark.com.xebia.data.spot."
 
   /** Returns the given config key as prefixed with [[SPOT_CONFIG_PREFIX]]. */
   @inline

@@ -45,11 +45,11 @@ To use context propagation, provide the necessary headers as SparkConf values. T
   spark-submit \
       --jar com.xebia.data.spot.spot-complete-${SPARK_VERSION}_${SCALA_VERSION}-x.y.z.jar \
       --conf spark.extraListeners=com.xebia.data.spot.TelemetrySparkListener \
-+     --conf com.xebia.data.spot.traceparent=00-1234abcd5678abcd-1234abcd-01 \
++     --conf spark.com.xebia.data.spot.traceparent=00-1234abcd5678abcd-1234abcd-01 \
       com.example.MySparkJob
 ```
 
-All SparkConf values that start with `com.xebia.data.spot.` are made available to the `ContextPropagator`. If you use a different propagator than the default, you can prefix its required keys accordingly.
+All SparkConf values that start with `spark.com.xebia.data.spot.` are made available to the `ContextPropagator`. If you use a different propagator than the default, you can prefix its required keys accordingly.
 
 ### Prerequisites
 
@@ -85,14 +85,14 @@ If the OpenTelemetry Autoconfigure mechanism doesn't meet your requirements, you
     }
     ```
 2. Make the compiled class available to your Spark environment.
-3. Add `com.xebia.data.spot.sdkProvider` to your spark config, referencing your implementation.
+3. Add `spark.com.xebia.data.spot.sdkProvider` to your spark config, referencing your implementation.
     ```diff
       SPARK_VERSION=3.5
       SCALA_VERSION=2.12  # This will be 2.12 or 2.13, whichever matches your Spark deployment.
       spark-submit \
           --jar com.xebia.data.spot.spot-complete-${SPARK_VERSION}_${SCALA_VERSION}-x.y.z.jar \
           --conf spark.extraListeners=com.xebia.data.spot.TelemetrySparkListener \
-    +     --conf com.xebia.data.spot.sdkProvider=com.example.MyCustomProvider \
+    +     --conf spark.com.xebia.data.spot.sdkProvider=com.example.MyCustomProvider \
           com.example.MySparkJob
     ```
 

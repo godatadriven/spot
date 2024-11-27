@@ -8,7 +8,7 @@ import org.slf4j.{Logger, LoggerFactory}
  * Grants access to an OpenTelemetry instance.
  *
  * If no configuration is provided, this attempts to load the spot.autoconf.SdkProvider, which is defined in the "spot-
- * complete" subproject. If the configuration contains a value for the key 'com.xebia.data.spot.sdkProvider', it
+ * complete" subproject. If the configuration contains a value for the key 'spark.com.xebia.data.spot.sdkProvider', it
  * attempts to load the class indicated by that value.
  */
 trait OpenTelemetrySupport {

@@ -9,7 +9,7 @@ class OpenTelemetrySupportTest extends AnyFlatSpec with should.Matchers {
   behavior of "OpenTelemetrySupport"
 
   it should "reflectively create an SDK provider based on 'spot.sdkProvider' config" in {
-    val uh = new NoopOpenTelemetrySupport("com.xebia.data.spot.sdkProvider" -> classOf[NoopSdkProvider].getName)
+    val uh = new NoopOpenTelemetrySupport("spark.com.xebia.data.spot.sdkProvider" -> classOf[NoopSdkProvider].getName)
     uh.openTelemetry should be theSameInstanceAs OpenTelemetry.noop()
   }
 }
