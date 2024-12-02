@@ -11,9 +11,14 @@ class AutoconfiguredOpenTelemetrySdkProviderTest extends AnyFlatSpec with should
     val uh = new TestOpenTelemetrySupport()
     // TODO improve verification;
     uh.openTelemetry should not be (null)
+    uh.openTelemetry.toString should matchPattern {
+      case s: String if s.contains("attributes={service.name=\"this is a test\"") =>
+    }
   }
 }
 
 private[this] class TestOpenTelemetrySupport extends OpenTelemetrySupport {
-  override def spotConfig: Map[String, String] = Map.empty
+  override def spotConfig: Map[String, String] = Map(
+    "spark.otel.service.name" -> "this is a test"
+  )
 }

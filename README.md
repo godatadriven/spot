@@ -61,12 +61,33 @@ If you're using Spark on top of Kubernetes, you should install and configure the
 
 The automatic configuration is controlled by a set of environment variables or JVM system properties. These are documented here: [configuration][otel-config].
 
+#### As Environment Variables
+
+Use any mechanism of choice, such as shell exports:
+
 ```bash
 export OTEL_TRACES_EXPORTER=zipkin
 export OTEL_EXPORTER_ZIPKIN_ENDPOINT=http://localhost:9411/api/v2/spans
 ```
 
-Note: if you use the Kubernetes Operator, these variables are controlled there.
+Note: if you use the Kubernetes Operator, these environment variables are controlled there.
+
+#### As JVM System Properties
+
+Besides all the standard ways, JVM system properties can also be passed to Spot via the spark-submit command:
+
+```diff
+  SPARK_VERSION=3.5
+  SCALA_VERSION=2.12
+  spark-submit \
+      --jar com.xebia.data.spot.spot-complete-${SPARK_VERSION}_${SCALA_VERSION}-x.y.z.jar \
+      --conf spark.extraListeners=com.xebia.data.spot.TelemetrySparkListener \
++     --conf spark.otel.traces.exporter=zipkin \
++     --conf spark.exporter.zipkin.endpoint=http://localhost:9411/api/v2/spans \
+      com.example.MySparkJob
+```
+
+All options starting with `spark.otel` are so exposed. Note: existing values are overwritten.
 
 ### Configuring OpenTelemetry SDK Manually
 

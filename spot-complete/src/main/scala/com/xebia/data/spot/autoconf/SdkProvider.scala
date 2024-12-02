@@ -11,6 +11,10 @@ import java.util.concurrent.TimeUnit
 /**
  * Uses OpenTelemetry Autoconfigure to build an OpenTelemetry SDK.
  *
+ * Any SparkConf properties that start with `spark.otel` (such as `spark.otel.service.name`) are exposed as JVM system
+ * properties (sans `spark.` prefix). This allows otel configuration (see link below) to be included as `--conf` args
+ * to spark-submit.
+ *
  * To configure the autoconf SDK, see [[https://opentelemetry.io/docs/languages/java/configuration/]]. If you're on
  * Kubernetes, have a look at the OpenTelemetry Operator.
  */
@@ -19,6 +23,18 @@ class SdkProvider extends OpenTelemetrySdkProvider {
 
   override def get(config: Map[String, String]): OpenTelemetrySdk = {
     logger.info("Using AutoConfigured OpenTelemetry SDK.")
+    config.foreach {
+      case (k,v) if k.startsWith("spark.otel") =>
+        val otelProperty = k.substring(6)
+        sys.props.get(otelProperty) match {
+          case Some(old) =>
+            logger.info(s"Replacing '$otelProperty' in JVM system properties, changing it from '$old' to '$v'.")
+          case None =>
+            logger.info(s"Adding '$otelProperty' to JVM system properties as '$v'.")
+        }
+        sys.props.put(otelProperty, v)
+      case _ =>
+    }
     val sdk = AutoConfiguredOpenTelemetrySdk.initialize().getOpenTelemetrySdk
 
     sys.addShutdownHook {
