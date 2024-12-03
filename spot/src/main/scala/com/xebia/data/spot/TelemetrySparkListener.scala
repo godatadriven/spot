@@ -1,6 +1,6 @@
 package com.xebia.data.spot
 
-import io.opentelemetry.api.common.Attributes
+import io.opentelemetry.api.common.{Attributes, AttributeKey}
 import io.opentelemetry.api.trace.{Span, StatusCode}
 import io.opentelemetry.context.{Context, Scope}
 import org.apache.spark.SparkConf
@@ -23,6 +23,7 @@ import scala.collection.mutable
  */
 class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener with OpenTelemetrySupport {
   import com.xebia.data.spot.TelemetrySparkListener.{PendingContext, PendingSpan}
+  import com.xebia.data.spot.{TelemetrySpanAttributes => atts}
 
   @transient
   protected val logger: Logger = LoggerFactory.getLogger(getClass.getName)
@@ -44,10 +45,10 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
   override def onApplicationStart(event: SparkListenerApplicationStart): Unit = {
     val sb = tracer.spanBuilder(s"application-${event.appName}")
       .setParent(rootContext._1)
-      .setAttribute(TelemetrySpanAttributes.appName, event.appName)
-      .setAttribute(TelemetrySpanAttributes.sparkUser, event.sparkUser)
-    event.appId.foreach(sb.setAttribute(TelemetrySpanAttributes.appId, _))
-    event.appAttemptId.foreach(sb.setAttribute(TelemetrySpanAttributes.appAttemptId, _))
+      .setAttribute(atts.appName, event.appName)
+      .setAttribute(atts.sparkUser, event.sparkUser)
+    event.appId.foreach(sb.setAttribute(atts.appId, _))
+    event.appAttemptId.foreach(sb.setAttribute(atts.appAttemptId, _))
     val span = sb.startSpan()
     val scope = span.makeCurrent()
     val context = span.storeInContext(rootContext._1)
@@ -88,6 +89,7 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
             // For some reason, the JobFailed case class is private[spark], and we can't record the exception.
             span.setStatus(StatusCode.ERROR)
         }
+        span.setAttribute(atts.jobTime, Long.box(event.time))
         span.end()
         scope.close()
       }
@@ -97,17 +99,17 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
     logger.info(s"onStageCompleted: $event, parentIds=${event.stageInfo.parentIds}")
     stageIdToJobId.get(event.stageInfo.stageId).map(jobSpans).foreach {
       case (span, _, _) =>
-        val atts = Attributes.builder()
-        atts.put("spark.job.stage.id", event.stageInfo.stageId)
-        atts.put("spark.job.stage.name", event.stageInfo.name)
-        atts.put("spark.job.stage.attempt", event.stageInfo.attemptNumber())
-        atts.put("spark.job.stage.diskBytesSpilled", event.stageInfo.taskMetrics.diskBytesSpilled)
-        atts.put("spark.job.stage.memoryBytesSpilled", event.stageInfo.taskMetrics.memoryBytesSpilled)
-        atts.put("spark.job.stage.peakExecutionMemory", event.stageInfo.taskMetrics.peakExecutionMemory)
+        val atb = Attributes.builder()
+        atb.put(atts.jobStageId, event.stageInfo.stageId)
+        atb.put(atts.jobStageName, event.stageInfo.name)
+        atb.put(atts.jobStageAttempt, event.stageInfo.attemptNumber())
+        atb.put(atts.jobStageDiskSpill, Long.box(event.stageInfo.taskMetrics.diskBytesSpilled))
+        atb.put(atts.jobStageMemSpill, Long.box(event.stageInfo.taskMetrics.memoryBytesSpilled))
+        atb.put(atts.jobStagePeakExMem, Long.box(event.stageInfo.taskMetrics.peakExecutionMemory))
         event.stageInfo.failureReason.foreach { reason =>
-          atts.put("spark.job.stage.failureReason", reason)
+          atb.put(atts.jobStageFailureReason, reason)
         }
-        span.addEvent("stageCompleted",atts.build())
+        span.addEvent("stageCompleted", atb.build())
     }
     stageIdToJobId -= event.stageInfo.stageId
   }
