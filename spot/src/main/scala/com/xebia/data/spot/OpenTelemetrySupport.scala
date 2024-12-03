@@ -4,13 +4,12 @@ import io.opentelemetry.api.OpenTelemetry
 import io.opentelemetry.api.trace.Tracer
 import org.slf4j.{Logger, LoggerFactory}
 
-/**
- * Grants access to an OpenTelemetry instance.
- *
- * If no configuration is provided, this attempts to load the spot.autoconf.SdkProvider, which is defined in the "spot-
- * complete" subproject. If the configuration contains a value for the key 'spark.com.xebia.data.spot.sdkProvider', it
- * attempts to load the class indicated by that value.
- */
+/** Grants access to an OpenTelemetry instance.
+  *
+  * If no configuration is provided, this attempts to load the spot.autoconf.SdkProvider, which is defined in the "spot-
+  * complete" subproject. If the configuration contains a value for the key 'spark.com.xebia.data.spot.sdkProvider', it
+  * attempts to load the class indicated by that value.
+  */
 trait OpenTelemetrySupport {
   import OpenTelemetrySupport.logger
 

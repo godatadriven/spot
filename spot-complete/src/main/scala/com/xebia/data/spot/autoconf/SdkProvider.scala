@@ -7,24 +7,22 @@ import org.slf4j.LoggerFactory
 
 import java.util.concurrent.TimeUnit
 
-
-/**
- * Uses OpenTelemetry Autoconfigure to build an OpenTelemetry SDK.
- *
- * Any SparkConf properties that start with `spark.otel` (such as `spark.otel.service.name`) are exposed as JVM system
- * properties (sans `spark.` prefix). This allows otel configuration (see link below) to be included as `--conf` args
- * to spark-submit.
- *
- * To configure the autoconf SDK, see [[https://opentelemetry.io/docs/languages/java/configuration/]]. If you're on
- * Kubernetes, have a look at the OpenTelemetry Operator.
- */
+/** Uses OpenTelemetry Autoconfigure to build an OpenTelemetry SDK.
+  *
+  * Any SparkConf properties that start with `spark.otel` (such as `spark.otel.service.name`) are exposed as JVM system
+  * properties (sans `spark.` prefix). This allows otel configuration (see link below) to be included as `--conf` args
+  * to spark-submit.
+  *
+  * To configure the autoconf SDK, see [[https://opentelemetry.io/docs/languages/java/configuration/]]. If you're on
+  * Kubernetes, have a look at the OpenTelemetry Operator.
+  */
 class SdkProvider extends OpenTelemetrySdkProvider {
   private val logger = LoggerFactory.getLogger(classOf[SdkProvider])
 
   override def get(config: Map[String, String]): OpenTelemetrySdk = {
     logger.info("Using AutoConfigured OpenTelemetry SDK.")
     config.foreach {
-      case (k,v) if k.startsWith("spark.otel") =>
+      case (k, v) if k.startsWith("spark.otel") =>
         val otelProperty = k.substring(6)
         sys.props.get(otelProperty) match {
           case Some(old) =>
@@ -43,7 +41,7 @@ class SdkProvider extends OpenTelemetrySdkProvider {
       completion.whenComplete(() => {
         completion.getFailureThrowable match {
           case e: Throwable => logger.warn(s"OpenTelemetry SDK shut down with Exception: ${e.toString}", e)
-          case _ => logger.info("OpenTelemetry SDK shut down successfully.")
+          case _            => logger.info("OpenTelemetry SDK shut down successfully.")
         }
       })
       completion.join(1, TimeUnit.MINUTES)

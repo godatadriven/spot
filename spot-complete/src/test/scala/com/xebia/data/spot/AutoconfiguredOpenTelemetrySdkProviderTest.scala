@@ -18,7 +18,5 @@ class AutoconfiguredOpenTelemetrySdkProviderTest extends AnyFlatSpec with should
 }
 
 private[this] class TestOpenTelemetrySupport extends OpenTelemetrySupport {
-  override def spotConfig: Map[String, String] = Map(
-    "spark.otel.service.name" -> "this is a test"
-  )
+  override def spotConfig: Map[String, String] = Map("spark.otel.service.name" -> "this is a test")
 }

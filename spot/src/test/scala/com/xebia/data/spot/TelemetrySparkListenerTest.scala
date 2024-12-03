@@ -13,7 +13,13 @@ import io.opentelemetry.sdk.trace.data.{SpanData, StatusData}
 import io.opentelemetry.sdk.trace.SdkTracerProvider
 import io.opentelemetry.sdk.trace.samplers.Sampler
 import org.apache.spark.SparkConf
-import org.apache.spark.scheduler.{JobSucceeded, SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerJobEnd, SparkListenerJobStart}
+import org.apache.spark.scheduler.{
+  JobSucceeded,
+  SparkListenerApplicationEnd,
+  SparkListenerApplicationStart,
+  SparkListenerJobEnd,
+  SparkListenerJobStart
+}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpecLike
 import org.scalatest.matchers.should.Matchers
@@ -38,31 +44,28 @@ class TelemetrySparkListenerTest extends AnyFlatSpecLike with BeforeAndAfterEach
     tsl.onApplicationEnd(SparkListenerApplicationEnd(5200L))
 
     val spans = getFinishedSpanItems
-    spans should have length(2)
+    spans should have length (2)
 
     // The spans are listed in order of having been ended.
     val appSpan = spans.get(1)
     val jobSpan = spans.get(0)
 
-    assertThat(appSpan)
-      .isSampled
-      .hasEnded
-      .hasNoParent
+    assertThat(appSpan).isSampled.hasEnded.hasNoParent
       .hasName("application-testapp")
       .hasAttribute(TelemetrySpanAttributes.appId, "ta123")
       .hasAttribute(TelemetrySpanAttributes.appName, "testapp")
       .hasAttribute(TelemetrySpanAttributes.appAttemptId, "1")
       .hasAttribute(TelemetrySpanAttributes.sparkUser, "User")
 
-    assertThat(jobSpan)
-      .isSampled
-      .hasEnded
+    assertThat(jobSpan).isSampled.hasEnded
       .hasParent(appSpan)
       .hasName("job-00001")
       .hasStatus(StatusData.ok())
   }
 
-  it should "get traceId from config if provided" in new TestTelemetrySparkListener("spark.com.xebia.data.spot.traceparent" -> "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01") {
+  it should "get traceId from config if provided" in new TestTelemetrySparkListener(
+    "spark.com.xebia.data.spot.traceparent" -> "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"
+  ) {
     tsl.onApplicationStart(SparkListenerApplicationStart("testapp", Some("ta123"), 100L, "User", Some("1"), None, None))
     tsl.onApplicationEnd(SparkListenerApplicationEnd(5200L))
     val appSpan = getFinishedSpanItems.get(0)
@@ -91,9 +94,18 @@ object TestingSdkProvider {
   private[spot] val spanExporter: InMemorySpanExporter = InMemorySpanExporter.create()
   private[spot] val testingSdk: OpenTelemetrySdk = {
     sys.props.put("io.opentelemetry.context.enableStrictContext", "true")
-    OpenTelemetrySdk.builder().setTracerProvider(
-      SdkTracerProvider.builder().setClock(clock).setSampler(Sampler.alwaysOn()).addSpanProcessor(SimpleSpanProcessor.builder(spanExporter).build()).build()
-    ).setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance())).build()
+    OpenTelemetrySdk
+      .builder()
+      .setTracerProvider(
+        SdkTracerProvider
+          .builder()
+          .setClock(clock)
+          .setSampler(Sampler.alwaysOn())
+          .addSpanProcessor(SimpleSpanProcessor.builder(spanExporter).build())
+          .build()
+      )
+      .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
+      .build()
   }
 
   def getFinishedSpanItems: util.List[SpanData] = {
@@ -107,4 +119,3 @@ object TestingSdkProvider {
 class TestingSdkProvider extends OpenTelemetrySdkProvider {
   override def get(config: Map[String, String]): OpenTelemetry = testingSdk
 }
-

@@ -4,10 +4,9 @@ import io.opentelemetry.api.common.AttributeKey
 
 import java.lang
 
-/**
- * Precomposed attribute keys. These aren't necessary in most cases (the `setAttribute` function has an overload that
- * takes a string), but I think it's useful to have them all in one overview.
- */
+/** Precomposed attribute keys. These aren't necessary in most cases (the `setAttribute` function has an overload that
+  * takes a string), but I think it's useful to have them all in one overview.
+  */
 object TelemetrySpanAttributes {
   import AttributeKey._
   val appAttemptId: AttributeKey[String] = stringKey("spark.appAttemptId")

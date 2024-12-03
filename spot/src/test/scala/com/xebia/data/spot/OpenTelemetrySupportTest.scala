@@ -15,7 +15,7 @@ class OpenTelemetrySupportTest extends AnyFlatSpec with should.Matchers {
 }
 
 class NoopOpenTelemetrySupport(config: (String, String)*) extends OpenTelemetrySupport {
-  override def spotConfig: Map[String, String] = Map(config:_*)
+  override def spotConfig: Map[String, String] = Map(config: _*)
 }
 
 class NoopSdkProvider extends OpenTelemetrySdkProvider {

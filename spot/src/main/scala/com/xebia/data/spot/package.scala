@@ -1,11 +1,12 @@
 package com.xebia.data
 
-/**
- * Spot: Spark-OpenTelemetry integration.
- */
+/** Spot: Spark-OpenTelemetry integration.
+  */
 package object spot {
+
   /** Fully-qualified classname of the default SdkProvider implementation. This class is defined in the sibling project
-   * and therefore unavailable on our compile-time classpath. */
+    * and therefore unavailable on our compile-time classpath.
+    */
   val DEFAULT_PROVIDER_FQCN = "com.xebia.data.spot.autoconf.SdkProvider"
 
   /** Common prefix for all our keys in the SparkConf. */

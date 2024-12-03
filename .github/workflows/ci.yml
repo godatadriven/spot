@@ -32,6 +32,10 @@ jobs:
         shell: bash
         run: |
           sbt +test
+      - name: Verify formatting
+        shell: bash
+        run: |
+          sbt +scalafmtCheckAll
       - name: Verify assembly
         shell: bash
         run: |

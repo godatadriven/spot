@@ -3,7 +3,6 @@ package com.xebia.data.spot
 import org.scalatest.flatspec.AnyFlatSpecLike
 import scala.collection.JavaConverters._
 
-
 class GetContextFromConfigTest extends AnyFlatSpecLike {
   import org.scalatest.matchers.should.Matchers._
 
@@ -11,12 +10,12 @@ class GetContextFromConfigTest extends AnyFlatSpecLike {
 
   it should "only return keys in the spark.com.xebia.data.spot namespace, with prefix removed" in new ContextFromConfigTest {
     val keys = getContextFromConfig.keys(spotConfig).asScala
-    keys should contain only("abc", "xyz")
+    keys should contain only ("abc", "xyz")
   }
 
   it should "get values by applying the spark.com.xebia.data.spot prefix" in new ContextFromConfigTest {
-    getContextFromConfig.get(spotConfig, "abc") should equal ("abc")
-    getContextFromConfig.get(spotConfig, "xyz") should equal ("xyz")
+    getContextFromConfig.get(spotConfig, "abc") should equal("abc")
+    getContextFromConfig.get(spotConfig, "xyz") should equal("xyz")
   }
 }
 
