@@ -96,17 +96,24 @@ lazy val `spot-complete` = projectMatrix
         // The spot-complete subproject has no purpose as a stand-alone JAR file, we only care about the assembly.
         Compile / packageBin / artifactName := { (_, _, _) => "_ignore-me.jar" },
         Compile / packageBin / publishArtifact := false,
+        // The scala library is shipped with Spark, we don't need our own copy.
         assembly / assemblyOption ~= {
             _.withIncludeScala(false)
         },
         assembly / assemblyMergeStrategy := {
-            // TODO this okio business may well be wrong. Revisit this once we have an integration test to run.
-            case "META-INF/versions/9/module-info.class" => MergeStrategy.last
-            case "META-INF/okio.kotlin_module" => MergeStrategy.last
+            // We don't need the module files, easiest way out of the name class is to leave them out.
+            case "META-INF/versions/9/module-info.class" => MergeStrategy.discard
+            case "META-INF/okio.kotlin_module" => MergeStrategy.discard
             case x =>
                 val oldStrategy = (ThisBuild / assemblyMergeStrategy).value
                 oldStrategy(x)
-        }
+        },
+        assembly / assemblyShadeRules := Seq(
+            // The opentelemetry gRPC sender relies on OkHttp. It also exists somewhere else in a Spark classpath, and
+            // we've seen classpath version issues, specifically NoSuchMethodError. We use shading as a workaround,
+            // because then we don't have to make any assumptions about our target environment.
+            ShadeRule.rename("okhttp3.**" -> "spot.shaded.okhttp3.@1", "okio.**" -> "spot.shaded.okio.@1").inAll
+        ),
     )
 
 lazy val root = projectMatrix
