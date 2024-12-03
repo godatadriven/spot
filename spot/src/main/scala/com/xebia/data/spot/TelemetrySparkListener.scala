@@ -1,9 +1,10 @@
 package com.xebia.data.spot
 
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.trace.{Span, StatusCode}
 import io.opentelemetry.context.{Context, Scope}
 import org.apache.spark.SparkConf
-import org.apache.spark.scheduler.{JobSucceeded, SparkListener, SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerJobEnd, SparkListenerJobStart, SparkListenerStageCompleted}
+import org.apache.spark.scheduler.{JobFailed, JobSucceeded, SparkListener, SparkListenerApplicationEnd, SparkListenerApplicationStart, SparkListenerJobEnd, SparkListenerJobStart, SparkListenerStageCompleted}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
@@ -31,6 +32,7 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
 
   private var applicationSpan: Option[PendingSpan] = None
   private val jobSpans = mutable.Map[Int, PendingSpan]()
+  private val stageIdToJobId = mutable.Map[Int, Int]()
 
   lazy val rootContext: PendingContext = {
     logger.info(s"Find rootcontext; config is ${spotConfig}")
@@ -70,6 +72,8 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
         val span = tracer.spanBuilder("job-%05d".format(event.jobId))
           .setParent(parentContext)
           .startSpan()
+        stageIdToJobId ++= event.stageIds.map(stageId => stageId -> event.jobId)
+        span.setAttribute("stageIds", event.stageIds.mkString(","))
         val scope = span.makeCurrent()
         val context = span.storeInContext(parentContext)
         jobSpans += event.jobId -> (span, context, scope)
@@ -80,7 +84,9 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
       jobSpans.get(event.jobId).foreach { case (span, _, scope) =>
         event.jobResult match {
           case JobSucceeded => span.setStatus(StatusCode.OK)
-          case _ => span.setStatus(StatusCode.ERROR)
+          case _ =>
+            // For some reason, the JobFailed case class is private[spark], and we can't record the exception.
+            span.setStatus(StatusCode.ERROR)
         }
         span.end()
         scope.close()
@@ -88,9 +94,22 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
     }
 
   override def onStageCompleted(event: SparkListenerStageCompleted): Unit = {
-    // event.stageInfo.rddInfos: memSize interessant
-    // event.stageInfo.rddInfos.foreach(_.memSize)
-    // event.stageInfo.taskMetrics.peakExecutionMemory
+    logger.info(s"onStageCompleted: $event, parentIds=${event.stageInfo.parentIds}")
+    stageIdToJobId.get(event.stageInfo.stageId).map(jobSpans).foreach {
+      case (span, _, _) =>
+        val atts = Attributes.builder()
+        atts.put("spark.job.stage.id", event.stageInfo.stageId)
+        atts.put("spark.job.stage.name", event.stageInfo.name)
+        atts.put("spark.job.stage.attempt", event.stageInfo.attemptNumber())
+        atts.put("spark.job.stage.diskBytesSpilled", event.stageInfo.taskMetrics.diskBytesSpilled)
+        atts.put("spark.job.stage.memoryBytesSpilled", event.stageInfo.taskMetrics.memoryBytesSpilled)
+        atts.put("spark.job.stage.peakExecutionMemory", event.stageInfo.taskMetrics.peakExecutionMemory)
+        event.stageInfo.failureReason.foreach { reason =>
+          atts.put("spark.job.stage.failureReason", reason)
+        }
+        span.addEvent("stageCompleted",atts.build())
+    }
+    stageIdToJobId -= event.stageInfo.stageId
   }
 }
 
