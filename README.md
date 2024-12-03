@@ -1,13 +1,13 @@
 # Spot: Spark-OpenTelemetry
 [![Build](https://github.com/godatadriven/spot/actions/workflows/ci.yml/badge.svg)](https://github.com/godatadriven/spot/actions/workflows/ci.yml)
 
-This package connects [Apache Spark™][sp-home] to [OpenTelemetry][ot-home].
+This package connects [Apache Spark™][sp-home] to [OpenTelemetry][ot-home] Tracing.
 
-This allows reporting tracing and metrics from any Spark or PySpark job to [OpenTelemetry Collector][ot-col], or directly to any [supported backend][ot-export].
+This allows reporting tracing from any Spark or PySpark job to [OpenTelemetry Collector][ot-col], or directly to any [supported backend][ot-export].
 
 ## Status
 
-ℹ️This project is in initial development. It's not ready for use.
+ℹ️This project is in early development. It can be used for proof-of-concept, but the instrumentation is not comprehensive.
 
 ## Usage
 
@@ -140,7 +140,7 @@ If the OpenTelemetry SDK cannot be obtained during startup, we allow the listene
 These are things that are out of scope for the moment:
 
 1. Downstream propagation of trace context. It may be useful in some environments to forward the trace context to downstream systems such as data stores.
-2. OpenTelemetry Airflow Plugin. If the Spark job is started by an Airflow DAG Run, it would be neat if some data from the DAG Run can be added to the OpenTelemetry context in Spot. Airflow could itself participate in distributed tracing: DAG Runs and Task Executions can be mapped as traces, with context propagation into the Spot Listener. In addition, key variables such as the data interval start and end could be made available as baggage.
+2. Airflow Integration. The Apache Airflow scheduler is instrumented with OpenTelemetry tracing. We have not yet found a way to forward the traceId and spanId for an Airflow `SparkSubmitOperator` into a spot-instrumented Spark job. Early exploration can be found in the whirl project: [examples/spark-opentelemetry][whirl].
 
 
 [ot-auto]:     https://opentelemetry.io/docs/languages/java/instrumentation/#automatic-configuration
@@ -152,3 +152,4 @@ These are things that are out of scope for the moment:
 [ot-k8s-oper]: https://opentelemetry.io/docs/kubernetes/operator/
 [sp-home]:     https://spark.apache.org
 [traceparent]: https://www.w3.org/TR/trace-context/
+[whirl]:       https://github.com/godatadriven/whirl/tree/kg/spark-opentelemetry/examples/spark-opentelemetry
