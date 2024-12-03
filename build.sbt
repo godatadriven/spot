@@ -93,6 +93,9 @@ lazy val `spot-complete` = projectMatrix
             scalaTest % Test,
             scalactic % Test
         ),
+        // The spot-complete subproject has no purpose as a stand-alone JAR file, we only care about the assembly.
+        Compile / packageBin / artifactName := { (_, _, _) => "_ignore-me.jar" },
+        Compile / packageBin / publishArtifact := false,
         assembly / assemblyOption ~= {
             _.withIncludeScala(false)
         },
