@@ -1,11 +1,10 @@
 package com.xebia.data.spot
 
-import io.opentelemetry.api.common.{AttributeKey, Attributes}
+import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.trace.{Span, StatusCode}
 import io.opentelemetry.context.{Context, Scope}
 import org.apache.spark.SparkConf
 import org.apache.spark.scheduler.{
-  JobFailed,
   JobSucceeded,
   SparkListener,
   SparkListenerApplicationEnd,
@@ -96,10 +95,10 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
   override def onJobEnd(event: SparkListenerJobEnd): Unit = {
     jobSpans.get(event.jobId).foreach { case (span, _, scope) =>
       event.jobResult match {
-        case JobSucceeded => span.setStatus(StatusCode.OK)
-        case _            =>
-          // For some reason, the JobFailed case class is private[spark], and we can't record the exception.
-          span.setStatus(StatusCode.ERROR)
+        case JobSucceeded   => span.setStatus(StatusCode.OK)
+        case jobFailed: Any =>
+          // The JobFailed(e) case class is private[spark], therefore we can't use span.recordException(e).
+          span.setStatus(StatusCode.ERROR, jobFailed.toString)
       }
       span.setAttribute(atts.jobTime, Long.box(event.time))
       span.end()
