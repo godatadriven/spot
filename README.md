@@ -9,6 +9,12 @@ This allows reporting tracing from any Spark or PySpark job to [OpenTelemetry Co
 
 ℹ️This project is in early development. It can be used for proof-of-concept, but the instrumentation is not comprehensive.
 
+## Screenshot
+
+Here's what a simple Spark job managed by Airflow might look like, if both Airflow and Spark report traces to Grafana Tempo:
+
+![Screenshot of Grafana Tempo, showing traces of an Airflow DAG Execution and a Spark Job](./docs/images/Grafana-Tempo-Airflow-Spark.png)
+
 ## Usage
 
 The recommended way to use Spot relies on [OpenTelemetry Autoconfigure][ot-auto] to obtain the OpenTelemetry configuration. You pass the spot-complete jar to spark-submit to make Spot available to your job, and configure `spark.extraListeners` to enable it.
