@@ -1,3 +1,18 @@
+/*
+ * Copyright 2024 Xebia Netherlands
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 ThisBuild / organization := "com.xebia.data"
 ThisBuild / description := "OpenTelemetry Tracing for Apache Spark applications"
 ThisBuild / homepage := Some(url("https://github.com/godatadriven/spot"))
@@ -10,6 +25,11 @@ ThisBuild / scalaVersion := "2.13.15"
 ThisBuild / scalacOptions := Seq(
     "--deprecation",
     "--release:11",
+)
+ThisBuild / licenses += "Apache 2.0" -> url("https://apache.org/licenses/LICENSE-2.0")
+ThisBuild / packageOptions += Package.ManifestAttributes(
+  "License" -> "Apache-2.0",
+  "License-URL" -> "http://www.apache.org/licenses/LICENSE-2.0"
 )
 
 import Dependencies._
