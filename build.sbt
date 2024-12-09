@@ -25,6 +25,7 @@ ThisBuild / scalaVersion := "2.13.15"
 ThisBuild / scalacOptions := Seq(
     "--deprecation",
     "--release:11",
+    "-Xsource:2.13.0",
 )
 ThisBuild / licenses += "Apache 2.0" -> url("https://apache.org/licenses/LICENSE-2.0")
 ThisBuild / packageOptions += Package.ManifestAttributes(
