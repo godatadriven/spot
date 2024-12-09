@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit
   * To configure the autoconf SDK, see [[https://opentelemetry.io/docs/languages/java/configuration/]]. If you're on
   * Kubernetes, have a look at the OpenTelemetry Operator.
   */
-class SdkProvider extends OpenTelemetrySdkProvider {
-  private val logger = LoggerFactory.getLogger(classOf[SdkProvider])
+class AutoConfiguredSdkProvider extends OpenTelemetrySdkProvider {
+  private val logger = LoggerFactory.getLogger(classOf[AutoConfiguredSdkProvider])
 
   override def get(config: Map[String, String]): OpenTelemetrySdk = {
     logger.info("Using AutoConfigured OpenTelemetry SDK.")

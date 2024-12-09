@@ -22,7 +22,7 @@ package object spot {
   /** Fully-qualified classname of the default SdkProvider implementation. This class is defined in the sibling project
     * and therefore unavailable on our compile-time classpath.
     */
-  val DEFAULT_PROVIDER_FQCN = "com.xebia.data.spot.autoconf.SdkProvider"
+  val DEFAULT_PROVIDER_FQCN = "com.xebia.data.spot.autoconf.AutoConfiguredSdkProvider"
 
   /** Common prefix for all our keys in the SparkConf. */
   val SPOT_CONFIG_PREFIX = "spark.com.xebia.data.spot."
