@@ -17,6 +17,7 @@ package com.xebia.data.spot
 
 import com.xebia.data.spot.TestingSdkProvider.testingSdk
 import io.opentelemetry.api.OpenTelemetry
+import io.opentelemetry.api.trace.StatusCode
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator
 import io.opentelemetry.context.propagation.ContextPropagators
 import io.opentelemetry.sdk.OpenTelemetrySdk
@@ -33,7 +34,8 @@ import org.apache.spark.scheduler.{
   SparkListenerApplicationEnd,
   SparkListenerApplicationStart,
   SparkListenerJobEnd,
-  SparkListenerJobStart
+  SparkListenerJobStart,
+  SparkPrivatesAccessor
 }
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.flatspec.AnyFlatSpecLike
@@ -71,11 +73,31 @@ class TelemetrySparkListenerTest extends AnyFlatSpecLike with BeforeAndAfterEach
       .hasAttribute(TelemetrySpanAttributes.appName, "testapp")
       .hasAttribute(TelemetrySpanAttributes.appAttemptId, "1")
       .hasAttribute(TelemetrySpanAttributes.sparkUser, "User")
+      .hasStatus(StatusData.ok())
 
     assertThat(jobSpan).isSampled.hasEnded
       .hasParent(appSpan)
       .hasName("job-00001")
       .hasStatus(StatusData.ok())
+  }
+
+  it should "set a negative status on the ApplicationSpan if a Job fails" in new TestTelemetrySparkListener() {
+    tsl.onApplicationStart(SparkListenerApplicationStart("testapp", Some("ta123"), 100L, "User", Some("1"), None, None))
+    advanceTimeBy(Duration.ofMillis(200))
+    tsl.onJobStart(SparkListenerJobStart(1, 200L, Seq.empty, null))
+    advanceTimeBy(Duration.ofMillis(5000))
+    tsl.onJobEnd(SparkListenerJobEnd(1, 5000, SparkPrivatesAccessor.jobFailed(new IllegalStateException("test"))))
+    advanceTimeBy(Duration.ofMillis(100))
+    tsl.onApplicationEnd(SparkListenerApplicationEnd(5200L))
+
+    val spans = getFinishedSpanItems
+    spans should have length (2)
+    val appSpan = spans.get(1)
+    val jobSpan = spans.get(0)
+    assertThat(appSpan).hasEnded.hasStatus(StatusData.error())
+    assertThat(jobSpan).hasEnded.hasStatus(
+      StatusData.create(StatusCode.ERROR, "JobFailed(java.lang.IllegalStateException: test)")
+    )
   }
 
   it should "get traceId from config if provided" in new TestTelemetrySparkListener(

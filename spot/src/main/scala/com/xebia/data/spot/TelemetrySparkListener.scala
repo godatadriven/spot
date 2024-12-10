@@ -15,6 +15,7 @@
  */
 package com.xebia.data.spot
 
+import com.xebia.data.spot.TelemetrySparkListener.ApplicationSpan
 import io.opentelemetry.api.common.Attributes
 import io.opentelemetry.api.trace.{Span, StatusCode}
 import io.opentelemetry.context.{Context, Scope}
@@ -54,7 +55,7 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
 
   override def spotConfig: Map[String, String] = sparkConf.getAll.toMap
 
-  private var applicationSpan: Option[PendingSpan] = None
+  private var applicationSpan: Option[ApplicationSpan] = None
   private val jobSpans = mutable.Map[Int, PendingSpan]()
   private val stageIdToJobId = mutable.Map[Int, Int]()
 
@@ -77,12 +78,16 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
     val span = sb.startSpan()
     val scope = span.makeCurrent()
     val context = span.storeInContext(rootContext._1)
-    applicationSpan = Some((span, context, scope))
+    applicationSpan = Some(ApplicationSpan(span, context, scope))
   }
 
   override def onApplicationEnd(event: SparkListenerApplicationEnd): Unit = {
     applicationSpan
-      .map { case (span, _, scope) =>
+      .map { case ApplicationSpan(span, _, scope, status) =>
+        status match {
+          case StatusCode.UNSET => span.setStatus(StatusCode.OK)
+          case _                => span.setStatus(status)
+        }
         span.end()
         scope.close()
       }
@@ -94,7 +99,7 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
   }
 
   override def onJobStart(event: SparkListenerJobStart): Unit = {
-    applicationSpan.foreach { case (_, parentContext, _) =>
+    applicationSpan.foreach { case ApplicationSpan(_, parentContext, _, _) =>
       val span = tracer
         .spanBuilder("job-%05d".format(event.jobId))
         .setParent(parentContext)
@@ -113,6 +118,8 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
         case JobSucceeded   => span.setStatus(StatusCode.OK)
         case jobFailed: Any =>
           // The JobFailed(e) case class is private[spark], therefore we can't use span.recordException(e).
+          // TODO test with a Spark Job that succeeds after a task retry, what does that look like?
+          applicationSpan = applicationSpan.map(_.failed())
           span.setStatus(StatusCode.ERROR, jobFailed.toString)
       }
       span.setAttribute(atts.jobTime, Long.box(event.time))
@@ -143,4 +150,7 @@ class TelemetrySparkListener(val sparkConf: SparkConf) extends SparkListener wit
 object TelemetrySparkListener {
   type PendingContext = (Context, Scope)
   type PendingSpan = (Span, Context, Scope)
+  case class ApplicationSpan(span: Span, context: Context, scope: Scope, status: StatusCode = StatusCode.UNSET) {
+    def failed(): ApplicationSpan = this.copy(status = StatusCode.ERROR)
+  }
 }
