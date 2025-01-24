@@ -30,7 +30,7 @@ ThisBuild / scalacOptions := Seq(
 ThisBuild / licenses += "Apache 2.0" -> url("https://apache.org/licenses/LICENSE-2.0")
 ThisBuild / packageOptions += Package.ManifestAttributes(
   "License" -> "Apache-2.0",
-  "License-URL" -> "http://www.apache.org/licenses/LICENSE-2.0"
+  "License-URL" -> "https://www.apache.org/licenses/LICENSE-2.0"
 )
 
 import Dependencies._
