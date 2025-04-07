@@ -25,7 +25,7 @@ object Dependencies {
   val `opentelemetry-exporter-otlp` = "io.opentelemetry" % "opentelemetry-exporter-otlp" % openTelemetryVersion
   val `spark-core-3.3` = "org.apache.spark" %% "spark-core" % "3.3.4"
   val `spark-core-3.4` = "org.apache.spark" %% "spark-core" % "3.4.4"
-  val `spark-core-3.5` = "org.apache.spark" %% "spark-core" % "3.5.4"
+  val `spark-core-3.5` = "org.apache.spark" %% "spark-core" % "3.5.5"
   val scalactic = "org.scalactic" %% "scalactic" % "3.2.19"
   val scalaTest = "org.scalatest" %% "scalatest" % "3.2.19"
   val `assertj-core` = "org.assertj" % "assertj-core" % "3.27.3"
