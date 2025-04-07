@@ -16,7 +16,7 @@
 import sbt._
 
 object Dependencies {
-  private[this] val openTelemetryVersion = "1.47.0"
+  private[this] val openTelemetryVersion = "1.49.0"
 
   val `opentelemetry-api` = "io.opentelemetry" % "opentelemetry-api" % openTelemetryVersion
   val `opentelemetry-sdk` = "io.opentelemetry" % "opentelemetry-sdk" % openTelemetryVersion
